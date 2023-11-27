@@ -1,10 +1,13 @@
 import pandas
 
 # Reading hotel information from a CSV file
-df = pandas.read_csv("hotels.csv", dtype={"id": str})
+df = pandas.read_csv("data/hotels.csv", dtype={"id": str})
 
-# Reading credit card info from a CSV file
-df_cards = pandas.read_csv("cards.csv", dtype=str).to_dict(orient="records")
+# Reading credit card info from CSV file
+df_cards = pandas.read_csv("data/cards.csv",
+                           dtype=str).to_dict(orient="records")
+df_cards_security = pandas.read_csv("data/card_security.csv",
+                                    dtype=str)
 
 
 # Represents a hotel entity with booking and availability functionalities
@@ -17,7 +20,7 @@ class Hotel:
         """Book the hotel by updating its availability in the DataFrame and
         saving it back to the CSV file"""
         df.loc[df["id"] == self.hotel_id, "available"] = "no"
-        df.to_csv("hotels.csv", index=False)
+        df.to_csv("data/hotels.csv", index=False)
 
     def available(self):
         """Check if the hotel is available based on its availability status
@@ -38,8 +41,8 @@ class Reservation:
         self.hotel = hotel_object
 
     def generate(self):
-        """Generate and return a confirmation message for the reservation at the
-        selected hotel"""
+        """Generate and return a confirmation message for the reservation at
+        the selected hotel"""
         content = f"""
         Thank you for your reservation!
         Here are your booking data:
@@ -66,6 +69,17 @@ class CreditCard:
             return False
 
 
+class SecureCreditCard(CreditCard):
+    def authenticate(self, given_password):
+        """Authenticate the secure credit card with the given password."""
+        password = df_cards_security.loc[
+            df_cards_security["number"] == self.number, "password"].squeeze()
+        if password == given_password:
+            return True
+        else:
+            return False
+
+
 # Displaying the list if hotels
 print(df)
 
@@ -76,20 +90,23 @@ hotel = Hotel(hotel_ID)
 # Checking if the selected hotel is available
 if hotel.available():
     # Simulate credit card validation
-    credit_card = CreditCard(number="1234")
+    credit_card = SecureCreditCard(number="1234")
     if credit_card.validate(expiration="12/26",
                             cvc="123",
                             holder="JOHN SMITH"):
-        # Proceed with hotel booking and reservation confirmation
-        hotel.book()
+        if credit_card.authenticate(given_password="mypass1"):
+            # Proceed with hotel booking and reservation confirmation
+            hotel.book()
 
-        # Ask for user input: customer name
-        name = input("Enter your name: ")
+            # Ask for user input: customer name
+            name = input("Enter your name: ")
 
-        # Generate a reservation confirmation at the selected hotel
-        reservation_confirmation = Reservation(customer_name=name,
-                                               hotel_object=hotel)
-        print(reservation_confirmation.generate())
+            # Generate a reservation confirmation at the selected hotel
+            reservation_confirmation = Reservation(customer_name=name,
+                                                   hotel_object=hotel)
+            print(reservation_confirmation.generate())
+        else:
+            print("Credit card authentication failed!")
     else:
         print("There is a problem with your payment!")
 else:
