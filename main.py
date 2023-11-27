@@ -8,6 +8,7 @@ df = pandas.read_csv("hotels.csv", dtype={"id": str})
 class Hotel:
     def __init__(self, hotel_id):
         self.hotel_id = hotel_id
+        self.name = df.loc[df["id"] == self.hotel_id, "name"].squeeze()
 
     def book(self):
         """Book the hotel by updating its availability in the DataFrame and
@@ -27,11 +28,22 @@ class Hotel:
 
 # Represents a reservation for a customer at a hotel
 class Reservation:
-    def __init__(self, customer_name, hotel):
-        pass
+    def __init__(self, customer_name, hotel_object):
+        """Initialize a Reservation object with customer name and the
+            corresponding hotel object"""
+        self.customer_name = customer_name
+        self.hotel = hotel_object
 
     def generate(self):
-        pass
+        """Generate and return a confirmation message for the reservation at the
+            selected hotel"""
+        content = f"""
+        Thank you for your reservation!
+        Here are your booking data:
+        Name: {self.customer_name}
+        Hotel: {self.hotel.name}
+        """
+        return content
 
 
 # Displaying the contents of the loaded CSV data
@@ -50,5 +62,8 @@ if hotel.available():
     name = input("Enter your name: ")
 
     # Generate a reservation confirmation at the selected hotel
-    reservation_confirmation = Reservation(name, hotel)
+    reservation_confirmation = Reservation(customer_name=name,
+                                           hotel_object=hotel)
     print(reservation_confirmation.generate())
+else:
+    print("Hotel is not available!")
