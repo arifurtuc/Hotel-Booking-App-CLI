@@ -94,7 +94,7 @@ if hotel.available():
     if credit_card.validate(expiration="12/26",
                             cvc="123",
                             holder="JOHN SMITH"):
-        if credit_card.authenticate(given_password="mypass1"):
+        if credit_card.authenticate(given_password="mypass"):
             # Proceed with hotel booking and reservation confirmation
             hotel.book()
 
