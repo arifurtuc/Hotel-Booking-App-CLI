@@ -1,7 +1,7 @@
 import pandas
 
 # Reading hotel information from a CSV file
-df = pandas.read_csv("hotels.csv")
+df = pandas.read_csv("hotels.csv", dtype={"id": str})
 
 
 # Represents a hotel entity with booking and availability functionalities
@@ -10,9 +10,14 @@ class Hotel:
         self.hotel_id = hotel_id
 
     def book(self):
-        pass
+        """Book the hotel by updating its availability in the DataFrame and
+        saving it back to the CSV file"""
+        df.loc[df["id"] == self.hotel_id, "available"] = "no"
+        df.to_csv("hotels.csv", index=False)
 
     def available(self):
+        """Check if the hotel is available based on its availability status
+        in the DataFrame"""
         availability = df.loc[df["id"] == self.hotel_id, "available"].squeeze()
         if availability == "yes":
             return True
